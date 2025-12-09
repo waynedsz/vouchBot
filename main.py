@@ -36,10 +36,9 @@ pinned_message_id = None
 
 @bot.message_handler(func=lambda message: True)
 def handle_messages(message):
-
     global pinned_message_id
 
-    # Only watch messages from your channel
+    # Ensure we are only listening inside the channel
     if str(message.chat.id) != CHANNEL_ID:
         return
 
@@ -47,17 +46,23 @@ def handle_messages(message):
     if pinned_message_id is None:
         pinned_message_id = get_or_create_pinned_message()
 
-    # Detect "vouch"
-    if "vouch" in message.text.lower():
+    # Only count forwarded messages
+    if not message.forward_from and not message.forward_from_chat:
+        return
+
+    # Detect "vouch" keyword in forwarded text
+    if message.text and "vouch" in message.text.lower():
+        
         count = load_counter() + 1
         save_counter(count)
 
-        # Update pinned message
+        # Update pinned vouch count
         bot.edit_message_text(
             f"Vouches: {count}",
             chat_id=CHANNEL_ID,
             message_id=pinned_message_id
         )
+
 
 
 if __name__ == "__main__":
