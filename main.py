@@ -49,21 +49,18 @@ def is_admin(user_id):
 
 def formatted_message(count):
     return (
-        "🔵 <b>Vouch Counter</b>\n\n"
-        f"<b>{DISPLAY_NAME}'s Total Vouches:</b> {count}\n\n"
+        "🔷 <b>Vouch Counter</b>\n"
+        "────────────────────\n\n"
+        f"✅ <b>{DISPLAY_NAME}'s Total Vouches:</b> <b>{count}</b>\n\n"
+        "📌 <i>Here you can find my vouches.</i>"
     )
 
 
+
 def extract_count_from_pinned(pinned):
-    """
-    Reads the pinned message text/caption and extracts the number.
-    Returns None if not found.
-    """
     text = pinned.caption or pinned.text or ""
-    match = re.search(r"Total Vouches:</b>\s*(\d+)", text)
-    if match:
-        return int(match.group(1))
-    return None
+    match = re.search(r"Total Vouches:.*?(\d+)", text)
+    return int(match.group(1)) if match else None
 
 
 def ensure_pinned_message():

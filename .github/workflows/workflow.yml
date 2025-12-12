@@ -21,5 +21,8 @@ jobs:
       env:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+        DISPLAY_NAME: ${{ secrets.DISPLAY_NAME }}
+        IMAGE_FILE_ID: ${{ secrets.IMAGE_FILE_ID }}
+
       run: |
         python main.py
