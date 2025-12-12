@@ -1,43 +1,38 @@
 # Telegram Vouch Counter Bot
 
-A simple, free Telegram bot that automatically counts **vouches** in a Telegram channel and displays the total in a **pinned message**.
-
-Designed to be:
-- beginner-friendly
-- fully free
-- safe for public GitHub repos
-- easy to fork and customise
+A lightweight, free Telegram bot that counts **vouches** in a Telegram channel and displays the total in a **pinned message**.  
+Built to be simple, forkable, and safe for public GitHub repositories.
 
 ---
 
 ## ✨ Features
 
-- Automatically creates and pins a **Vouch Counter** message
-- Increments the counter when a **forwarded message** contains the word `vouch`
-- Supports **text messages and photo captions**
-- Admin-only commands to manage the counter
-- Optional **image** in the pinned message (using Telegram `file_id`)
-- **Persistent counter** (survives restarts by reading the pinned message)
+- Automatically creates and pins a **Vouch Counter**
+- Increments when a **forwarded message** contains the keyword `vouch`
+- Works with **text messages and photo captions**
+- **Admin-only** management commands
+- Optional **image** in the pinned message (via Telegram `file_id`)
+- **Persistent counter** (restores state by reading the pinned message)
 - No database required
 - No hardcoded personal data
 
 ---
 
-## 📌 How it works
+## 📌 How It Works
 
-1. The bot is added as an **admin** to a channel  
-2. If no pinned message exists, it creates one  
+1. Add the bot as an **admin** to your channel  
+2. On first run, the bot creates and pins a counter message  
 3. You forward messages into the channel  
 4. If a forwarded message contains `vouch`, the counter increases  
-5. On restart, the bot restores the counter from the pinned message  
+5. If the bot restarts, it restores the count from the pinned message  
 
 ---
 
 ## 🔧 Requirements
 
 - Python 3.9+
-- Telegram bot token (via **@BotFather**)
-- Telegram channel where the bot is an admin
+- Telegram bot token (from **@BotFather**)
+- A Telegram channel where the bot is an admin
 - `pyTelegramBotAPI`
 
 ---
@@ -57,87 +52,97 @@ Designed to be:
 
 ## 📦 Installation
 
-### 1. Clone the repo
+### 1. Clone the repository
 
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git  
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
 cd YOUR_REPO
+```
 
 ### 2. Install dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
 ---
 
 ## 🔐 Environment Variables / Secrets
 
-This project uses **GitHub Secrets** (or environment variables).
+This project is designed to use **GitHub Secrets** (or environment variables).
 
 ### Required
 
-- BOT_TOKEN – Telegram bot token  
-- CHANNEL_ID – Telegram channel ID (starts with `-100`)  
+- `BOT_TOKEN` – Your Telegram bot token  
+- `CHANNEL_ID` – Your Telegram channel ID (starts with `-100`)  
 
 ### Optional (recommended)
 
-- DISPLAY_NAME – Name shown in the pinned message  
-- IMAGE_FILE_ID – Telegram `file_id` for an image  
+- `DISPLAY_NAME` – Name shown in the pinned message  
+- `IMAGE_FILE_ID` – Telegram `file_id` of an image for the pinned message  
 
 ---
 
-## 🖼️ How to add an image (optional)
+## 🖼️ Adding an Image (Optional)
 
-This bot uses **Telegram `file_id`**, not public image hosting.
+The bot uses **Telegram `file_id`**, not public image hosting.
 
-Steps:
+### Steps
+
 1. Download your image  
-2. Send it to any Telegram chat  
-3. Forward the image to **@RawDataBot**  
-4. Copy the **largest `file_id`**  
-5. Save it as a secret named `IMAGE_FILE_ID`  
+2. Send it to your bot in a private chat  
+3. Forward that image to **@RawDataBot**  
+4. Copy the **largest `file_id`** from the response  
+5. Save it as a GitHub secret named `IMAGE_FILE_ID`  
 
-If no image is set, the bot uses a text-only pinned message.
+If `IMAGE_FILE_ID` is not set, the bot will create a **text-only** pinned message.
 
 ---
 
 ## 👮 Admin Commands
 
-All commands are **admin-only** and auto-delete.
+All commands are **admin-only** and automatically deleted to keep the channel clean.
 
-- /dec – Decrease the counter by 1  
-- /setcount <number> – Set the counter to an exact value  
-- /reset – Reset the counter to 0  
+- `/dec` – Decrease the counter by 1  
+- `/setcount <number>` – Set the counter to an exact value  
+- `/reset` – Reset the counter to 0  
 
 ---
 
-## 📌 Pinned Message Format
+## 📌 Pinned Message Example
 
 🔵 Vouch Counter  
 
-<DISPLAY_NAME>'s Total Vouches: 12
+username's Total Vouches: 12
 
 ---
 
 ## 🔁 Persistence
 
-The bot restores the counter by reading the **pinned message** on startup.
+The bot does **not** rely on a database.
 
-- No database
-- Free hosting friendly
-- Restarts do not reset the count
+On startup, it:
+- Reads the pinned message
+- Extracts the current vouch count
+- Restores the counter automatically
+
+This makes it suitable for **free hosting** and restarts without data loss.
 
 ---
 
-## 🚀 Running the bot
+## 🚀 Running the Bot
 
 ### Locally
 
+```bash
 python main.py
+```
 
 ### GitHub Actions
 
-- Add the secrets
+- Add the required secrets
 - Run the workflow manually (`workflow_dispatch`)
-- No commits required
+- No commits are needed to start or restart the bot
 
 ---
 
@@ -145,8 +150,8 @@ python main.py
 
 - Telegram does not notify bots when messages are deleted  
   → use `/dec` when removing a vouch manually
-- Only forwarded messages are counted
-- Keyword detection is case-insensitive
+- Only **forwarded messages** are counted
+- Keyword detection is **case-insensitive**
 
 ---
 
@@ -158,4 +163,4 @@ MIT License
 
 ## 🤝 Contributing
 
-Pull requests and improvements are welcome.
+Pull requests, improvements, and suggestions are welcome.
