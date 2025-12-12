@@ -14,7 +14,7 @@ bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 COUNTER_FILE = "counter.txt"
 pinned_message_id = None
-last_edit_time = 0.0   # ⬅️ throttle timestamp
+last_edit_time = 0.0
 
 
 # ------------------------------
@@ -94,23 +94,30 @@ def ensure_pinned_message():
     pinned_message_id = msg.message_id
 
 
-def throttled_update_pinned_message(count):
-    """Edit pinned message at most once every ~1.2 seconds"""
+def rate_limited_update_pinned_message(count):
+    """
+    Always updates the pinned message, but waits if edits are too frequent.
+    This avoids Telegram silently dropping edits.
+    """
     global last_edit_time
 
     now = time.time()
-    if now - last_edit_time < 1.2:
+    wait_time = 1.2 - (now - last_edit_time)
+    if wait_time > 0:
+        time.sleep(wait_time)
+
+    last_edit_time = time.time()
+
+    pinned = bot.get_chat(CHANNEL_ID).pinned_message
+    if not pinned:
         return
 
-    last_edit_time = now
-    pinned = bot.get_chat(CHANNEL_ID).pinned_message
-
     try:
-        if pinned and pinned.photo:
+        if pinned.photo:
             bot.edit_message_caption(
-                caption=formatted_message(count),
                 chat_id=CHANNEL_ID,
-                message_id=pinned_message_id
+                message_id=pinned_message_id,
+                caption=formatted_message(count)
             )
         else:
             bot.edit_message_text(
@@ -118,8 +125,8 @@ def throttled_update_pinned_message(count):
                 chat_id=CHANNEL_ID,
                 message_id=pinned_message_id
             )
-    except:
-        pass
+    except Exception as e:
+        print("Edit failed:", e)
 
 
 # ------------------------------
@@ -139,7 +146,7 @@ def dec(message):
     if count > 0:
         count -= 1
         save_counter(count)
-        throttled_update_pinned_message(count)
+        rate_limited_update_pinned_message(count)
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -160,7 +167,7 @@ def setcount(message):
 
     new_count = int(parts[1])
     save_counter(new_count)
-    throttled_update_pinned_message(new_count)
+    rate_limited_update_pinned_message(new_count)
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -175,7 +182,7 @@ def reset(message):
     ensure_pinned_message()
 
     save_counter(0)
-    throttled_update_pinned_message(0)
+    rate_limited_update_pinned_message(0)
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -198,7 +205,7 @@ def handle_channel_posts(message):
     if "vouch" in text.lower():
         count = load_counter() + 1
         save_counter(count)
-        throttled_update_pinned_message(count)
+        rate_limited_update_pinned_message(count)
 
 
 # ------------------------------
