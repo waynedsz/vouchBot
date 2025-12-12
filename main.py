@@ -6,6 +6,7 @@ import time
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")  # e.g. "-1001234567890"
 DISPLAY_NAME = os.getenv("DISPLAY_NAME", "User")
+VOUCH_USERNAME = os.getenv("VOUCH_USERNAME", "").lower()
 
 # Telegram image file_id (set as GitHub Secret)
 IMAGE_FILE_ID = os.getenv("IMAGE_FILE_ID")
@@ -50,10 +51,11 @@ def is_admin(user_id):
 # ------------------------------
 
 def formatted_message(count):
+    footer = f"\n\n👉 {VOUCH_USERNAME}" if VOUCH_USERNAME else ""
     return (
         f"🔷 {DISPLAY_NAME}'s Total Vouches: {count}\n\n"
-        "Here you can find all of my vouches.\n\n"
-        "👉 @wdszn"
+        "Here you can find all of my vouches."
+        f"{footer}"
     )
 
 
@@ -197,7 +199,7 @@ def handle_channel_posts(message):
     text = (message.text or message.caption or "").lower()
 
     is_forwarded = message.forward_from or message.forward_from_chat
-    mentions_user = "@wdszn" in text
+    mentions_user = VOUCH_USERNAME and VOUCH_USERNAME in text
 
     if "vouch" in text and (is_forwarded or mentions_user):
         count = load_counter() + 1
