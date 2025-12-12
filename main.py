@@ -135,8 +135,6 @@ def rate_limited_update_pinned_message(count):
 def dec(message):
     if str(message.chat.id) != CHANNEL_ID:
         return
-    if not is_admin(message.from_user.id):
-        return
 
     ensure_pinned_message()
 
@@ -152,8 +150,6 @@ def dec(message):
 @bot.channel_post_handler(commands=['setcount'])
 def setcount(message):
     if str(message.chat.id) != CHANNEL_ID:
-        return
-    if not is_admin(message.from_user.id):
         return
 
     ensure_pinned_message()
@@ -174,8 +170,6 @@ def setcount(message):
 def reset(message):
     if str(message.chat.id) != CHANNEL_ID:
         return
-    if not is_admin(message.from_user.id):
-        return
 
     ensure_pinned_message()
 
@@ -183,6 +177,7 @@ def reset(message):
     rate_limited_update_pinned_message(0)
 
     bot.delete_message(message.chat.id, message.message_id)
+
 
 
 # ------------------------------
