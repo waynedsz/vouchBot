@@ -95,10 +95,6 @@ def ensure_pinned_message():
 
 
 def rate_limited_update_pinned_message(count):
-    """
-    Always updates the pinned message, but waits if edits are too frequent.
-    This avoids Telegram silently dropping edits.
-    """
     global last_edit_time
 
     now = time.time()
@@ -198,11 +194,12 @@ def handle_channel_posts(message):
 
     ensure_pinned_message()
 
-    if not message.forward_from and not message.forward_from_chat:
-        return
+    text = (message.text or message.caption or "").lower()
 
-    text = message.text or message.caption or ""
-    if "vouch" in text.lower():
+    is_forwarded = message.forward_from or message.forward_from_chat
+    mentions_user = "@wdszn" in text
+
+    if "vouch" in text and (is_forwarded or mentions_user):
         count = load_counter() + 1
         save_counter(count)
         rate_limited_update_pinned_message(count)
