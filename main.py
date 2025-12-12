@@ -198,7 +198,7 @@ def handle_channel_posts(message):
 
     text = (message.text or message.caption or "").lower()
 
-    if "vouch" in text:
+    if "vouch" in text or "thanks" in text:
         count = load_counter() + 1
         save_counter(count)
         rate_limited_update_pinned_message(count)
