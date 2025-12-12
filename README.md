@@ -77,7 +77,7 @@ This project is designed to use **GitHub Secrets** (or environment variables).
 - `CHANNEL_ID` – Your Telegram channel ID (starts with `-100`)  
 - `DISPLAY_NAME` – Name shown in the pinned message  
 - `IMAGE_FILE_ID` – Telegram `file_id` of an image for the pinned message  
-- `VOUCH_USERNAME` - Set it to your Telegram user (inc. @) to allow hidden forwards to count.
+- `VOUCH_USERNAME` - Set it to your Telegram user (inc. @) to display on pinned.
 
 ---
 
