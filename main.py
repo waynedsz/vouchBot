@@ -3,6 +3,11 @@ import os
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")  # e.g. "-1001234567890"
+DISPLAY_NAME = os.getenv("DISPLAY_NAME", "User")
+
+# Image URL for pinned message (set as GitHub Secret / env var)
+# Recommended: set IMAGE_URL in GitHub Secrets
+IMAGE_URL = os.getenv("IMAGE_URL")  # e.g. "https://i.imgur.com/xxxx.png"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -32,21 +37,19 @@ def save_counter(value):
 def is_admin(user_id):
     try:
         admins = bot.get_chat_administrators(CHANNEL_ID)
-        admin_ids = [admin.user.id for admin in admins]
-        return user_id in admin_ids
+        return user_id in [admin.user.id for admin in admins]
     except:
         return False
 
 
 # ------------------------------
-# Pinned message creation
+# Pinned message formatting
 # ------------------------------
 
 def formatted_message(count):
     return (
-        "🔥 <b>Vouch Counter</b> 🔥\n\n"
-        f"<b>Total Vouches:</b> {count}\n\n"
-        "(Forward messages containing the word 'vouch')"
+        "🔵 <b>Vouch Counter</b>\n\n"
+        f"<b>{DISPLAY_NAME}'s Total Vouches:</b> {count}\n\n"
     )
 
 
@@ -55,11 +58,21 @@ def get_or_create_pinned_message():
     if pinned:
         return pinned.message_id
 
-    msg = bot.send_message(
-        CHANNEL_ID,
-        formatted_message(load_counter()),
-        parse_mode="HTML"
-    )
+    # If IMAGE_URL isn't set, fall back to a text-only message
+    if IMAGE_URL:
+        msg = bot.send_photo(
+            CHANNEL_ID,
+            IMAGE_URL,
+            caption=formatted_message(load_counter()),
+            parse_mode="HTML"
+        )
+    else:
+        msg = bot.send_message(
+            CHANNEL_ID,
+            formatted_message(load_counter()),
+            parse_mode="HTML"
+        )
+
     bot.pin_chat_message(CHANNEL_ID, msg.message_id)
     return msg.message_id
 
@@ -75,31 +88,81 @@ pinned_message_id = None
 def dec(message):
     global pinned_message_id
 
-    # ensure we are in the channel
     if str(message.chat.id) != CHANNEL_ID:
         return
 
-    # admin check
     if not is_admin(message.from_user.id):
         return
+
+    if pinned_message_id is None:
+        pinned_message_id = get_or_create_pinned_message()
 
     count = load_counter()
     if count > 0:
         count -= 1
         save_counter(count)
 
+        # If pinned message is a photo, edit caption; otherwise edit text
+        pinned = bot.get_chat(CHANNEL_ID).pinned_message
+        if pinned and pinned.photo:
+            bot.edit_message_caption(
+                caption=formatted_message(count),
+                chat_id=CHANNEL_ID,
+                message_id=pinned_message_id,
+                parse_mode="HTML"
+            )
+        else:
+            bot.edit_message_text(
+                formatted_message(count),
+                chat_id=CHANNEL_ID,
+                message_id=pinned_message_id,
+                parse_mode="HTML"
+            )
+
+    bot.delete_message(message.chat.id, message.message_id)
+
+
+@bot.message_handler(commands=['setcount'])
+def setcount(message):
+    global pinned_message_id
+
+    if str(message.chat.id) != CHANNEL_ID:
+        return
+
+    if not is_admin(message.from_user.id):
+        return
+
+    if pinned_message_id is None:
+        pinned_message_id = get_or_create_pinned_message()
+
+    parts = message.text.split()
+
+    if len(parts) != 2 or not parts[1].isdigit():
+        bot.delete_message(message.chat.id, message.message_id)
+        return
+
+    new_count = int(parts[1])
+    save_counter(new_count)
+
+    pinned = bot.get_chat(CHANNEL_ID).pinned_message
+    if pinned and pinned.photo:
+        bot.edit_message_caption(
+            caption=formatted_message(new_count),
+            chat_id=CHANNEL_ID,
+            message_id=pinned_message_id,
+            parse_mode="HTML"
+        )
+    else:
         bot.edit_message_text(
-            formatted_message(count),
+            formatted_message(new_count),
             chat_id=CHANNEL_ID,
             message_id=pinned_message_id,
             parse_mode="HTML"
         )
 
-    # (optional) delete your /dec command message
     bot.delete_message(message.chat.id, message.message_id)
 
 
-# Optional: /reset command
 @bot.message_handler(commands=['reset'])
 def reset(message):
     global pinned_message_id
@@ -110,14 +173,26 @@ def reset(message):
     if not is_admin(message.from_user.id):
         return
 
+    if pinned_message_id is None:
+        pinned_message_id = get_or_create_pinned_message()
+
     save_counter(0)
 
-    bot.edit_message_text(
-        formatted_message(0),
-        chat_id=CHANNEL_ID,
-        message_id=pinned_message_id,
-        parse_mode="HTML"
-    )
+    pinned = bot.get_chat(CHANNEL_ID).pinned_message
+    if pinned and pinned.photo:
+        bot.edit_message_caption(
+            caption=formatted_message(0),
+            chat_id=CHANNEL_ID,
+            message_id=pinned_message_id,
+            parse_mode="HTML"
+        )
+    else:
+        bot.edit_message_text(
+            formatted_message(0),
+            chat_id=CHANNEL_ID,
+            message_id=pinned_message_id,
+            parse_mode="HTML"
+        )
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -136,23 +211,30 @@ def handle_messages(message):
     if pinned_message_id is None:
         pinned_message_id = get_or_create_pinned_message()
 
-    # Only count forwarded messages
     if not message.forward_from and not message.forward_from_chat:
         return
 
-    # account for text or caption
     text = message.text or message.caption or ""
 
     if "vouch" in text.lower():
         count = load_counter() + 1
         save_counter(count)
 
-        bot.edit_message_text(
-            formatted_message(count),
-            chat_id=CHANNEL_ID,
-            message_id=pinned_message_id,
-            parse_mode="HTML"
-        )
+        pinned = bot.get_chat(CHANNEL_ID).pinned_message
+        if pinned and pinned.photo:
+            bot.edit_message_caption(
+                caption=formatted_message(count),
+                chat_id=CHANNEL_ID,
+                message_id=pinned_message_id,
+                parse_mode="HTML"
+            )
+        else:
+            bot.edit_message_text(
+                formatted_message(count),
+                chat_id=CHANNEL_ID,
+                message_id=pinned_message_id,
+                parse_mode="HTML"
+            )
 
 
 # ------------------------------

@@ -1,8 +1,6 @@
 name: Telegram Vouch Bot
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
