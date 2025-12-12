@@ -49,9 +49,9 @@ def is_admin(user_id):
 
 def formatted_message(count):
     return (
-        f"🔷 <b>{DISPLAY_NAME}'s Total Vouches:</b> <b>{count}</b>\n\n"
-        "📌 <b>Here you can find my vouches.</b>\n\n"
-        ":finger_pointing_right: @wdszn"
+        f"🔷 {DISPLAY_NAME}'s Total Vouches: {count}\n\n"
+        "Here you can find all of my vouches.\n\n"
+        "👉 @wdszn"
     )
 
 
