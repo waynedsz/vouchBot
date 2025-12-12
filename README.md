@@ -23,7 +23,7 @@ Built to be simple, forkable, and safe for public GitHub repositories.
 1. Add the bot as an **admin** to your channel  
 2. On first run, the bot creates and pins a counter message  
 3. You forward messages into the channel  
-4. If a forwarded message contains `vouch`, the counter increases  
+4. If a forwarded message contains `vouch` or `thanks`, the counter increases  
 5. If the bot restarts, it restores the count from the pinned message  
 
 ---
