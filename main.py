@@ -49,11 +49,10 @@ def is_admin(user_id):
 
 def formatted_message(count):
     return (
-        "🔷 <b>Vouch Counter</b>\n\n"
-        f"✅ <b>{DISPLAY_NAME}'s Total Vouches:</b> <b>{count}</b>\n\n"
-        "📌 <i>Here you can find my vouches.</i>"
+        f"🔷 <b>{DISPLAY_NAME}'s Total Vouches:</b> <b>{count}</b>\n\n"
+        "📌 <b>Here you can find my vouches.</b>\n\n"
+        ":finger_pointing_right: @wdszn"
     )
-
 
 
 def extract_count_from_pinned(pinned):
@@ -63,25 +62,18 @@ def extract_count_from_pinned(pinned):
 
 
 def ensure_pinned_message():
-    """
-    Ensures a pinned message exists AND syncs the counter from Telegram.
-    """
     global pinned_message_id
 
     chat = bot.get_chat(CHANNEL_ID)
     pinned = chat.pinned_message
 
-    # If pinned message exists, sync counter from it
     if pinned:
         pinned_message_id = pinned.message_id
-
         extracted = extract_count_from_pinned(pinned)
         if extracted is not None:
             save_counter(extracted)
-
         return
 
-    # No pinned message → create one
     count = load_counter()
 
     if IMAGE_FILE_ID:
@@ -122,10 +114,10 @@ def update_pinned_message(count):
 
 
 # ------------------------------
-# Admin Commands
+# Admin Commands (CHANNEL)
 # ------------------------------
 
-@bot.message_handler(commands=['dec'])
+@bot.channel_post_handler(commands=['dec'])
 def dec(message):
     if str(message.chat.id) != CHANNEL_ID:
         return
@@ -143,7 +135,7 @@ def dec(message):
     bot.delete_message(message.chat.id, message.message_id)
 
 
-@bot.message_handler(commands=['setcount'])
+@bot.channel_post_handler(commands=['setcount'])
 def setcount(message):
     if str(message.chat.id) != CHANNEL_ID:
         return
@@ -164,7 +156,7 @@ def setcount(message):
     bot.delete_message(message.chat.id, message.message_id)
 
 
-@bot.message_handler(commands=['reset'])
+@bot.channel_post_handler(commands=['reset'])
 def reset(message):
     if str(message.chat.id) != CHANNEL_ID:
         return
@@ -180,11 +172,11 @@ def reset(message):
 
 
 # ------------------------------
-# Message Handler (vouch detector)
+# Channel post handler (vouch detector)
 # ------------------------------
 
-@bot.message_handler(func=lambda message: True)
-def handle_messages(message):
+@bot.channel_post_handler(func=lambda message: True)
+def handle_channel_posts(message):
     if str(message.chat.id) != CHANNEL_ID:
         return
 

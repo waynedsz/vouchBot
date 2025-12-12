@@ -152,6 +152,7 @@ python main.py
   → use `/dec` when removing a vouch manually
 - Only **forwarded messages** are counted
 - Keyword detection is **case-insensitive**
+- This bot is designed for **Telegram channels**
 
 ---
 
