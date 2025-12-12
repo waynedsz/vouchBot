@@ -1,5 +1,6 @@
 import telebot
 import os
+import re
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")  # e.g. "-1001234567890"
@@ -53,28 +54,51 @@ def formatted_message(count):
     )
 
 
+def extract_count_from_pinned(pinned):
+    """
+    Reads the pinned message text/caption and extracts the number.
+    Returns None if not found.
+    """
+    text = pinned.caption or pinned.text or ""
+    match = re.search(r"Total Vouches:</b>\s*(\d+)", text)
+    if match:
+        return int(match.group(1))
+    return None
+
+
 def ensure_pinned_message():
+    """
+    Ensures a pinned message exists AND syncs the counter from Telegram.
+    """
     global pinned_message_id
 
-    if pinned_message_id is not None:
-        return
+    chat = bot.get_chat(CHANNEL_ID)
+    pinned = chat.pinned_message
 
-    pinned = bot.get_chat(CHANNEL_ID).pinned_message
+    # If pinned message exists, sync counter from it
     if pinned:
         pinned_message_id = pinned.message_id
+
+        extracted = extract_count_from_pinned(pinned)
+        if extracted is not None:
+            save_counter(extracted)
+
         return
+
+    # No pinned message → create one
+    count = load_counter()
 
     if IMAGE_FILE_ID:
         msg = bot.send_photo(
             CHANNEL_ID,
             IMAGE_FILE_ID,
-            caption=formatted_message(load_counter()),
+            caption=formatted_message(count),
             parse_mode="HTML"
         )
     else:
         msg = bot.send_message(
             CHANNEL_ID,
-            formatted_message(load_counter()),
+            formatted_message(count),
             parse_mode="HTML"
         )
 
