@@ -5,9 +5,8 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")  # e.g. "-1001234567890"
 DISPLAY_NAME = os.getenv("DISPLAY_NAME", "User")
 
-# Image URL for pinned message (set as GitHub Secret / env var)
-# Recommended: set IMAGE_URL in GitHub Secrets
-IMAGE_URL = os.getenv("IMAGE_URL")  # e.g. "https://i.imgur.com/xxxx.png"
+# Telegram image file_id (set as GitHub Secret)
+IMAGE_FILE_ID = os.getenv("IMAGE_FILE_ID")
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -58,15 +57,16 @@ def get_or_create_pinned_message():
     if pinned:
         return pinned.message_id
 
-    # If IMAGE_URL isn't set, fall back to a text-only message
-    if IMAGE_URL:
+    # If IMAGE_FILE_ID is set, send photo with caption
+    if IMAGE_FILE_ID:
         msg = bot.send_photo(
             CHANNEL_ID,
-            IMAGE_URL,
+            IMAGE_FILE_ID,
             caption=formatted_message(load_counter()),
             parse_mode="HTML"
         )
     else:
+        # Fallback: text-only pinned message
         msg = bot.send_message(
             CHANNEL_ID,
             formatted_message(load_counter()),
@@ -102,7 +102,6 @@ def dec(message):
         count -= 1
         save_counter(count)
 
-        # If pinned message is a photo, edit caption; otherwise edit text
         pinned = bot.get_chat(CHANNEL_ID).pinned_message
         if pinned and pinned.photo:
             bot.edit_message_caption(
@@ -136,7 +135,6 @@ def setcount(message):
         pinned_message_id = get_or_create_pinned_message()
 
     parts = message.text.split()
-
     if len(parts) != 2 or not parts[1].isdigit():
         bot.delete_message(message.chat.id, message.message_id)
         return
@@ -215,7 +213,6 @@ def handle_messages(message):
         return
 
     text = message.text or message.caption or ""
-
     if "vouch" in text.lower():
         count = load_counter() + 1
         save_counter(count)
