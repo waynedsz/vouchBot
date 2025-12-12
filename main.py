@@ -1,6 +1,7 @@
 import telebot
 import os
 import re
+import time
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")  # e.g. "-1001234567890"
@@ -13,6 +14,7 @@ bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 COUNTER_FILE = "counter.txt"
 pinned_message_id = None
+last_edit_time = 0.0   # ⬅️ throttle timestamp
 
 
 # ------------------------------
@@ -80,37 +82,44 @@ def ensure_pinned_message():
         msg = bot.send_photo(
             CHANNEL_ID,
             IMAGE_FILE_ID,
-            caption=formatted_message(count),
-            parse_mode="HTML"
+            caption=formatted_message(count)
         )
     else:
         msg = bot.send_message(
             CHANNEL_ID,
-            formatted_message(count),
-            parse_mode="HTML"
+            formatted_message(count)
         )
 
     bot.pin_chat_message(CHANNEL_ID, msg.message_id)
     pinned_message_id = msg.message_id
 
 
-def update_pinned_message(count):
+def throttled_update_pinned_message(count):
+    """Edit pinned message at most once every ~1.2 seconds"""
+    global last_edit_time
+
+    now = time.time()
+    if now - last_edit_time < 1.2:
+        return
+
+    last_edit_time = now
     pinned = bot.get_chat(CHANNEL_ID).pinned_message
 
-    if pinned and pinned.photo:
-        bot.edit_message_caption(
-            caption=formatted_message(count),
-            chat_id=CHANNEL_ID,
-            message_id=pinned_message_id,
-            parse_mode="HTML"
-        )
-    else:
-        bot.edit_message_text(
-            formatted_message(count),
-            chat_id=CHANNEL_ID,
-            message_id=pinned_message_id,
-            parse_mode="HTML"
-        )
+    try:
+        if pinned and pinned.photo:
+            bot.edit_message_caption(
+                caption=formatted_message(count),
+                chat_id=CHANNEL_ID,
+                message_id=pinned_message_id
+            )
+        else:
+            bot.edit_message_text(
+                formatted_message(count),
+                chat_id=CHANNEL_ID,
+                message_id=pinned_message_id
+            )
+    except:
+        pass
 
 
 # ------------------------------
@@ -130,7 +139,7 @@ def dec(message):
     if count > 0:
         count -= 1
         save_counter(count)
-        update_pinned_message(count)
+        throttled_update_pinned_message(count)
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -151,7 +160,7 @@ def setcount(message):
 
     new_count = int(parts[1])
     save_counter(new_count)
-    update_pinned_message(new_count)
+    throttled_update_pinned_message(new_count)
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -166,7 +175,7 @@ def reset(message):
     ensure_pinned_message()
 
     save_counter(0)
-    update_pinned_message(0)
+    throttled_update_pinned_message(0)
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -189,7 +198,7 @@ def handle_channel_posts(message):
     if "vouch" in text.lower():
         count = load_counter() + 1
         save_counter(count)
-        update_pinned_message(count)
+        throttled_update_pinned_message(count)
 
 
 # ------------------------------
