@@ -9,7 +9,7 @@ DISPLAY_NAME = os.getenv("DISPLAY_NAME", "User")
 # Telegram image file_id (set as GitHub Secret)
 IMAGE_FILE_ID = os.getenv("IMAGE_FILE_ID")
 
-bot = telebot.TeleBot(BOT_TOKEN)
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 COUNTER_FILE = "counter.txt"
 pinned_message_id = None
