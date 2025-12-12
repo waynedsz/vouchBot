@@ -55,8 +55,8 @@ Built to be simple, forkable, and safe for public GitHub repositories.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+git clone https://github.com/waynedsz/vouchBot.git
+cd vouchBot
 ```
 
 ### 2. Install dependencies
