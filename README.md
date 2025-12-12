@@ -75,11 +75,9 @@ This project is designed to use **GitHub Secrets** (or environment variables).
 
 - `BOT_TOKEN` – Your Telegram bot token  
 - `CHANNEL_ID` – Your Telegram channel ID (starts with `-100`)  
-
-### Optional (recommended)
-
 - `DISPLAY_NAME` – Name shown in the pinned message  
 - `IMAGE_FILE_ID` – Telegram `file_id` of an image for the pinned message  
+- `VOUCH_USERNAME` - Set it to your Telegram user (inc. @) to allow hidden forwards to count.
 
 ---
 
