@@ -23,7 +23,6 @@ jobs:
         CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         DISPLAY_NAME: ${{ secrets.DISPLAY_NAME }}
         IMAGE_FILE_ID: ${{ secrets.IMAGE_FILE_ID }}
-        VOUCH_USERNAME: ${{ secrets.VOUCH_USERNAME }}
 
       run: |
         python main.py

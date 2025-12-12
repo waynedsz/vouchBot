@@ -198,13 +198,11 @@ def handle_channel_posts(message):
 
     text = (message.text or message.caption or "").lower()
 
-    is_forwarded = message.forward_from or message.forward_from_chat
-    mentions_user = VOUCH_USERNAME and VOUCH_USERNAME in text
-
-    if "vouch" in text and (is_forwarded or mentions_user):
+    if "vouch" in text:
         count = load_counter() + 1
         save_counter(count)
         rate_limited_update_pinned_message(count)
+
 
 
 # ------------------------------
