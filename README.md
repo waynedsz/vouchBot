@@ -37,16 +37,16 @@ Built to be simple, forkable, and safe for public GitHub repositories.
 
 ---
 
-## 📁 Project Structure
 
+## 📁 Project Structure
+```
 .
 ├── main.py
 ├── requirements.txt
 ├── counter.txt        # ignored by git
-├── .gitignore
-└── .github/
-    └── workflows/
-        └── workflow.yml
+├── README.md
+├── assets/
+```
 
 ---
 
