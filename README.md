@@ -1,11 +1,10 @@
 # Telegram Vouch Counter Bot
 
 A lightweight, free Telegram bot that counts **vouches** in a Telegram channel and displays the total in a **pinned message**.  
-Built to be simple, forkable, and safe for public GitHub repositories.
 
 ---
 
-## ✨ Features
+## Features
 
 - Automatically creates and pins a **Vouch Counter**
 - Increments when a **forwarded message** contains the keyword `vouch`
@@ -69,7 +68,7 @@ pip install -r requirements.txt
 
 ## 🔐 Environment Variables / Secrets
 
-This project is designed to use **GitHub Secrets** (or environment variables).
+This project is designed to use **Secrets**.
 
 ### Required
 
@@ -156,7 +155,7 @@ python main.py
 
 ## 📜 License
 
-MIT License
+**WD Enterprises**
 
 ---
 
